@@ -25,6 +25,7 @@ jobs:
       - name: Build
         run: |
           npx aoe_technology_radar build
+          npx aoe_technology_radar serve
           
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
