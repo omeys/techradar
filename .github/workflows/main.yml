@@ -9,24 +9,38 @@ permissions:
   contents: write    # Required for pushing to gh-pages branch
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
+          
       - uses: actions/cache@v4
         with:
           path: |
             ~/.npm
             .techradar
           key: ${{ runner.os }}-techradar-${{ hashFiles('**/package-lock.json') }}
-      - run: npm ci
-      - run: npx aoe_technology_radar build
-      - run: if [ -n "$(git status --porcelain)" ]; then echo 'workspace is dirty after rebuilding' ; git status ; git diff ; exit 1 ; fi
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build radar
+        run: npx aoe_technology_radar build
+        
+      - name: Check build status
+        run: if [ -n "$(git status --porcelain)" ]; then echo 'workspace is dirty after rebuilding' ; git status ; git diff ; exit 1 ; fi
+        
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          name: build
-          path: build
+          branch: gh-pages
+          folder: build    # This should match your build output directory
+          clean: true     # Clean up old files
+
+      - name: Print deployment URL
+        run: |
+          echo "Deployed to https://${GITHUB_REPOSITORY_OWNER}.github.io/techradar"
