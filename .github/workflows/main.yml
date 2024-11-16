@@ -1,46 +1,42 @@
-name: Deploy Tech Radar to GitHub Pages
+name: Deploy Tech Radar
 
 on:
   push:
     branches:
-      - master
-
-permissions:
-  contents: write    # Required for pushing to gh-pages branch
+      - main  # Run the workflow on pushes to the main branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "lts/*"
-          
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.npm
-            .techradar
-          key: ${{ runner.os }}-techradar-${{ hashFiles('**/package-lock.json') }}
-          
-      - name: Install dependencies
-        run: npm ci
-        
-      - name: Build radar
-        run: npx aoe_technology_radar build
-        
-      - name: Check build status
-        run: if [ -n "$(git status --porcelain)" ]; then echo 'workspace is dirty after rebuilding' ; git status ; git diff ; exit 1 ; fi
-        
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: build
-          clean: true
 
-      - name: Print deployment URL
+    steps:
+      # Step 1: Checkout the Repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set Up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22' # Use a compatible Node.js version
+
+      # Step 3: Install Dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Build the Tech Radar
+      - name: Build Tech Radar
+        run: npx aoe_technology_radar build
+
+      # Step 5: Move Build Files to Docs Directory
+      - name: Move build files to docs folder
         run: |
-          echo "Deployed to https://${GITHUB_REPOSITORY_OWNER}.github.io/techradar"
+          rm -rf docs
+          mv .techradar docs
+
+      # Step 6: Configure Deployment to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs
