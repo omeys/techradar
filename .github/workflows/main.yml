@@ -9,31 +9,24 @@ permissions:
   contents: write    # Required for pushing to gh-pages branch
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-          
-      - name: Install dependencies
-        run: npm ci
-          
-      - name: Build
-        run: |
-          npx aoe_technology_radar build
-          npx aoe_technology_radar serve
-          
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - uses: actions/cache@v4
         with:
-          branch: gh-pages
-          folder: build  # AOE Tech Radar uses 'dist' as build output directory
-          clean: true   # Automatically remove old files
-
-      - name: Print deployment URL
-        run: |
-          echo "Deployed to https://${GITHUB_REPOSITORY_OWNER}.github.io/techradar"
+          path: |
+            ~/.npm
+            .techradar
+          key: ${{ runner.os }}-techradar-${{ hashFiles('**/package-lock.json') }}
+      - run: npm ci
+      - run: npm run build
+      - run: if [ -n "$(git status --porcelain)" ]; then echo 'workspace is dirty after rebuilding' ; git status ; git diff ; exit 1 ; fi
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build
