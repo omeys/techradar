@@ -1,0 +1,38 @@
+name: Deploy Tech Radar to GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write    # Required for pushing to gh-pages branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          
+      - name: Install dependencies
+        run: npm ci
+          
+      - name: Build
+        run: |
+          npm run build
+          
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: build  # AOE Tech Radar uses 'dist' as build output directory
+          clean: true   # Automatically remove old files
+
+      - name: Print deployment URL
+        run: |
+          echo "Deployed to https://${GITHUB_REPOSITORY_OWNER}.github.io/techradar"
