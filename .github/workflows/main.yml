@@ -38,8 +38,8 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: build    # This should match your build output directory
-          clean: true     # Clean up old files
+          folder: build
+          clean: true
 
       - name: Print deployment URL
         run: |
