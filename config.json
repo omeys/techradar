@@ -1,6 +1,6 @@
 {
-  "basePath": "/",
-  "baseUrl": "",
+  "basePath": "/techradar",
+  "baseUrl": "https://omeys.github.io/techradar",
   "editUrl": "https://github.dev/omeys/techradar/blob/main/radar/{release}/{id}.md",
   "logoFile": "logo.svg",
   "jsFile": "",
